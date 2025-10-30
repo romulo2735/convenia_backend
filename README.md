@@ -29,18 +29,25 @@ Este projeto utiliza **Docker** para configurar um ambiente Laravel completo, co
    docker-compose exec app php artisan key:generate
    ```
 
-5. Execute as migrations:
+5. Execute as migrations e seeders:
 
    ```bash
    docker-compose exec app php artisan migrate
-   ```
+   docker-compose exec app php artisan db:seed
    
-6. Acesse
+   # Gerar usuários
+   docker-compose exec app php artisan db:seed --class=UserSeeder
+   ```
+6. Crie as chaves da autenticação do passport:
+   ```bash
+   docker-compose exec app php artisan passport:client --personal --provider=users
+   ```
+
+7. Acesse
 
    ```bash
    http://localhost:8000
    ```
-
 ---
 
 ## 🚀 Tecnologias
