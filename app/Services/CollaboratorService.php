@@ -6,12 +6,14 @@ use App\Http\Requests\ImportFileRequest;
 use App\Jobs\ImportCollaboratorsJob;
 use App\Models\Collaborator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class CollaboratorService
 {
     public function list(array $filters = [])
     {
-        $query = Collaborator::query()->where('user_id', Auth::id());
+        $userId = Auth::id();
+        $query = Collaborator::query()->where('user_id', $userId);
 
         if (!empty($filters['search'])) {
             $query->where(function ($q) use ($filters) {
@@ -32,12 +34,28 @@ class CollaboratorService
 
         $perPage = isset($filters['per_page']) ? (int)$filters['per_page'] : 10;
 
-        return $query->paginate($perPage);
+        $cacheKey = 'collaborators:list:' . $userId . ':' . md5(json_encode([
+            'search' => $filters['search'] ?? null,
+            'sort_by' => $sortBy,
+            'sort_dir' => $sortDir,
+            'per_page' => $perPage,
+            'page' => request()->integer('page', 1),
+        ]));
+
+        return Cache::tags(['collaborators', 'user:' . $userId])->remember(
+            $cacheKey,
+            now()->addMinutes(5),
+            function () use ($query, $perPage) {
+                return $query->paginate($perPage);
+            }
+        );
     }
 
     public function create(array $data): Collaborator
     {
-        return Collaborator::create($data);
+        $collaborator = Collaborator::create($data);
+        Cache::tags(['collaborators', 'user:' . $collaborator->user_id])->flush();
+        return $collaborator;
     }
 
     public function find(Collaborator $collaborator): Collaborator
@@ -48,12 +66,14 @@ class CollaboratorService
     public function update(Collaborator $collaborator, array $data): Collaborator
     {
         $collaborator->update($data);
+        Cache::tags(['collaborators', 'user:' . $collaborator->user_id])->flush();
         return $collaborator;
     }
 
     public function delete(Collaborator $collaborator): void
     {
         $collaborator->delete();
+        Cache::tags(['collaborators', 'user:' . $collaborator->user_id])->flush();
     }
 
     public function import(ImportFileRequest $request): array
