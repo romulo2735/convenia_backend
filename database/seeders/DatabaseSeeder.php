@@ -15,10 +15,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-
+        // Base user for testing/demo
         User::factory()->create([
             'name' => 'Convenia Teste User',
             'email' => 'convenia@email.com',
         ]);
+
+        // Additional users
+        $this->call(UserSeeder::class);
+
+        // Collaborators for all users
+        $this->call(CollaboratorSeeder::class);
     }
 }
