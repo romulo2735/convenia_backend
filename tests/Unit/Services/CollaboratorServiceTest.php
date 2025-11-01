@@ -16,8 +16,6 @@ use Tests\TestCase;
 
 class CollaboratorServiceTest extends TestCase
 {
-    use RefreshDatabase;
-
     protected CollaboratorService $service;
 
     protected function setUp(): void
@@ -42,7 +40,6 @@ class CollaboratorServiceTest extends TestCase
 
         $this->signIn($userA);
 
-        // Create collaborators for both users
         $recordsForA = [
             ['name' => 'Alice Doe', 'email' => 'alice@example.com', 'cpf' => '11111111111', 'city' => 'Sao Paulo', 'state' => 'SP', 'user_id' => $userA->id],
             ['name' => 'Bob Smith', 'email' => 'bob@example.com', 'cpf' => '22222222222', 'city' => 'Rio', 'state' => 'RJ', 'user_id' => $userA->id],
@@ -59,22 +56,18 @@ class CollaboratorServiceTest extends TestCase
             Collaborator::create($data);
         }
 
-        // Basic list restricted to userA
         $page = $this->service->list([]);
         $this->assertSame(3, $page->total());
         $this->assertCount(3, $page->items());
 
-        // Search by part of name/email/cpf
         $pageSearch = $this->service->list(['search' => 'alice']);
         $this->assertSame(1, $pageSearch->total());
         $this->assertSame('Alice Doe', $pageSearch->items()[0]->name);
 
-        // Sort by email desc
         $pageSorted = $this->service->list(['sort_by' => 'email', 'sort_dir' => 'desc']);
         $emails = array_map(fn ($c) => $c->email, $pageSorted->items());
         $this->assertSame(['charlie@example.com', 'bob@example.com', 'alice@example.com'], $emails);
 
-        // Pagination (per_page = 2)
         $page1 = $this->service->list(['per_page' => 2, 'sort_by' => 'name', 'sort_dir' => 'asc']);
         $this->assertCount(2, $page1->items());
         $this->assertSame(3, $page1->total());

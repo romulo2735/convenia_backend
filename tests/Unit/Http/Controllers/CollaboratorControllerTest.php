@@ -21,8 +21,6 @@ use Tests\TestCase;
 
 class CollaboratorControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     /** @var MockInterface */
     private $serviceMock;
     private CollaboratorController $controller;
