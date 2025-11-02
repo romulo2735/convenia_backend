@@ -13,36 +13,37 @@ cp .env.example .env
 1. Subir os serviços Docker
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 1. Instalar dependências e gerar chave
 
 ```bash
-docker-compose exec app composer install
-docker-compose exec app php artisan key:generate
+docker compose exec app composer install
+docker compose exec app php artisan key:generate
 ```
 
 1. Migrar e popular o banco
 
 ```bash
-docker-compose exec app php artisan migrate
+docker compose exec app php artisan migrate
 # Popula com usuários e colaboradores
-docker-compose exec app php artisan db:seed
+docker compose exec app php artisan db:seed
 # (Opcional) seeders específicos
-docker-compose exec app php artisan db:seed --class=UserSeeder
+docker compose exec app php artisan db:seed --class=UserSeeder
 ```
 
 1. Configurar Passport (autenticação OAuth2)
 
 ```bash
-docker-compose exec app php artisan passport:client --personal --provider=users
+docker compose exec app php artisan passport:keys
+docker compose exec app php artisan passport:client --personal --provider=users
 ```
 
 1. Fila para processamento de importações (opcional)
 
 ```bash
-docker-compose exec app php artisan queue:work
+docker compose exec app php artisan queue:work
 ```
 
 1. Acessar a aplicação
