@@ -15,4 +15,6 @@ Route::get('/user', function (Request $request) {
 Route::middleware('auth:api')->group(function () {
     Route::apiResource('collaborators', CollaboratorController::class);
     Route::post('/collaborators/import', [CollaboratorController::class, 'importByFile']);
+
+    Route::post('logout', [AuthController::class, 'logout']);
 });
