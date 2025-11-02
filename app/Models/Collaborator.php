@@ -40,4 +40,17 @@ class Collaborator extends Model
             }
         });
     }
+
+    public function resolveRouteBinding($value, $field = null)
+    {
+        $field = $field ?? $this->getRouteKeyName();
+
+        $model = $this->where($field, $value)->where('user_id', auth()->id())->first();
+
+        if (!$model) {
+            abort(404, 'Collaborator not found or does not belong to the authenticated user.');
+        }
+
+        return $model;
+    }
 }

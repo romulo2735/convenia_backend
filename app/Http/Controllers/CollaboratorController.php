@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateCollaboratorRequest;
 use App\Http\Resources\CollaboratorResource;
 use App\Models\Collaborator;
 use App\Services\CollaboratorService;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\Request;
 
 class CollaboratorController extends Controller
@@ -34,12 +35,18 @@ class CollaboratorController extends Controller
 
     public function show(Collaborator $collaborator)
     {
+        if (!Gate::allows('view', $collaborator)) {
+            abort(403);
+        }
         return new CollaboratorResource($collaborator);
     }
 
 
     public function update(UpdateCollaboratorRequest $request, Collaborator $collaborator)
     {
+        if (!Gate::allows('update', $collaborator)) {
+            abort(403);
+        }
         $collaborator = $this->service->update($collaborator, $request->validated());
 
         return new CollaboratorResource($collaborator);
@@ -48,6 +55,9 @@ class CollaboratorController extends Controller
 
     public function destroy(Collaborator $collaborator)
     {
+        if (!Gate::allows('delete', $collaborator)) {
+            abort(403);
+        }
         $this->service->delete($collaborator);
         return response()->json(['message' => 'Collaborator has been deleted successfully']);
     }
